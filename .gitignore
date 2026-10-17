@@ -1,0 +1,18 @@
+# Entorno / secretos
+.env
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Datos locales
+saludos.db
+*.sqlite3
+
+# Sistema
+.DS_Store

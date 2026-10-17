@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Muro de Saludos — AWS Student Community Day Chile 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            aws: { orange: '#FF9900', navy: '#232F3E', navy2: '#1A232E' },
+            cl:  { blue: '#0039A6', red: '#D52B1E' }
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { background: radial-gradient(1200px 600px at 50% -10%, #2a3a4d 0%, #1A232E 55%, #141b24 100%); }
+    .card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -12px rgba(255,153,0,.25); }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans">
+
+  <!-- Barra superior con franja tricolor sutil (acento Chile) -->
+  <div class="h-1 w-full flex">
+    <div class="flex-1 bg-cl-blue"></div>
+    <div class="flex-1 bg-white/90"></div>
+    <div class="flex-1 bg-cl-red"></div>
+  </div>
+
+  <!-- Encabezado -->
+  <header class="max-w-6xl mx-auto px-4 pt-10 pb-6 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-aws-orange/10 border border-aws-orange/30 text-aws-orange text-sm font-semibold mb-5">
+      <span class="h-2 w-2 rounded-full bg-aws-orange animate-pulse"></span>
+      AWS Student Community Day · Chile 2026
+    </div>
+    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight">
+      Muro de Saludos
+      <span class="block text-lg sm:text-2xl font-semibold text-slate-300 mt-2">
+        AWS Student Community Day <span class="text-aws-orange">Chile 2026</span>
+      </span>
+    </h1>
+    <p class="mt-4 text-slate-400 max-w-2xl mx-auto">
+      Deja tu saludo para la comunidad estudiantil, sube tu foto del evento y aparece en el muro.
+    </p>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 pb-20">
+
+    <!-- Mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for category, message in messages %}
+            <div class="rounded-xl px-4 py-3 text-sm font-medium border
+                        {% if category == 'ok' %}bg-emerald-500/10 border-emerald-500/40 text-emerald-300
+                        {% else %}bg-red-500/10 border-red-500/40 text-red-300{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Formulario -->
+    <section class="mb-14">
+      <div class="mx-auto max-w-2xl bg-aws-navy/70 backdrop-blur border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <h2 class="text-xl font-bold mb-1">Publica tu saludo</h2>
+        <p class="text-slate-400 text-sm mb-6">Comparte un mensaje con la comunidad.</p>
+
+        <form action="{{ url_for('publicar') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1.5">Nombre completo</label>
+            <input name="nombre" type="text" required maxlength="80"
+                   placeholder="Ej: Camila Rojas"
+                   class="w-full rounded-xl bg-aws-navy2 border border-white/10 px-4 py-2.5 text-slate-100 placeholder-slate-500
+                          focus:outline-none focus:ring-2 focus:ring-aws-orange focus:border-transparent" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1.5">Universidad, Instituto o Comunidad</label>
+            <input name="comunidad" type="text" required maxlength="120"
+                   placeholder="Ej: Duoc UC Maipú"
+                   class="w-full rounded-xl bg-aws-navy2 border border-white/10 px-4 py-2.5 text-slate-100 placeholder-slate-500
+                          focus:outline-none focus:ring-2 focus:ring-aws-orange focus:border-transparent" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1.5">Mensaje de saludo</label>
+            <textarea name="mensaje" rows="3" required maxlength="500"
+                      placeholder="¡Saludos a toda la comunidad cloud de Chile!"
+                      class="w-full rounded-xl bg-aws-navy2 border border-white/10 px-4 py-2.5 text-slate-100 placeholder-slate-500
+                             focus:outline-none focus:ring-2 focus:ring-aws-orange focus:border-transparent resize-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1.5">Foto o avatar del evento</label>
+            <input name="foto" type="file" accept="image/*"
+                   class="block w-full text-sm text-slate-400
+                          file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0
+                          file:text-sm file:font-semibold file:bg-aws-orange file:text-aws-navy
+                          hover:file:bg-amber-400 cursor-pointer" />
+            <p class="text-xs text-slate-500 mt-1.5">PNG, JPG, GIF o WEBP · máx. 5 MB</p>
+          </div>
+
+          <button type="submit"
+                  class="w-full rounded-xl bg-aws-orange text-aws-navy font-bold py-3 px-4
+                         hover:bg-amber-400 active:scale-[.99] transition shadow-lg shadow-aws-orange/20">
+            Publicar saludo
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Muro -->
+    <section>
+      <div class="flex items-center gap-3 mb-6">
+        <h2 class="text-2xl font-bold">Muro de la comunidad</h2>
+        <span class="text-sm font-semibold px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300">
+          {{ saludos|length }} saludo{{ '' if saludos|length == 1 else 's' }}
+        </span>
+      </div>
+
+      {% if saludos %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {% for s in saludos %}
+            <article class="card-hover bg-aws-navy/70 border border-white/10 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+              {% if s.image_url %}
+                <div class="relative aspect-video bg-slate-950 flex items-center justify-center overflow-hidden cursor-pointer group"
+                     onclick="openModal('{{ s.image_url }}', '{{ s.nombre|e }}', '{{ s.comunidad|e }}', '{{ s.mensaje|e }}')"
+                     title="Haz clic para ver la foto en tamaño completo">
+                  <img src="{{ s.image_url }}" alt="Foto de {{ s.nombre }}"
+                       class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity bg-aws-navy/90 border border-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
+                      Ver foto completa
+                    </span>
+                  </div>
+                </div>
+              {% else %}
+                <div class="aspect-video bg-gradient-to-br from-aws-navy2 to-aws-navy flex items-center justify-center text-slate-500 text-xs font-medium uppercase tracking-wider">
+                  Sin imagen adjunta
+                </div>
+              {% endif %}
+              <div class="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 class="font-bold text-lg leading-tight">{{ s.nombre }}</h3>
+                  <p class="text-aws-orange text-sm font-semibold mb-3">{{ s.comunidad }}</p>
+                  <p class="text-slate-300 text-sm leading-relaxed">{{ s.mensaje }}</p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-500">
+                  <span>{{ s.created_at[:10] }}</span>
+                  {% if s.image_url %}
+                    <button type="button"
+                            onclick="openModal('{{ s.image_url }}', '{{ s.nombre|e }}', '{{ s.comunidad|e }}', '{{ s.mensaje|e }}')"
+                            class="text-aws-orange hover:text-amber-300 font-medium flex items-center gap-1 transition">
+                      Ver foto ↗
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-16 rounded-2xl border border-dashed border-white/15 bg-white/5">
+          <p class="text-slate-400">Aún no hay saludos registrados. Publica el primer mensaje.</p>
+        </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <!-- Modal Lightbox para visualizar fotos completas -->
+  <div id="image-modal"
+       class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-3 sm:p-6 transition-opacity duration-200"
+       onclick="closeModal(event)">
+    <div class="relative max-w-4xl w-full flex flex-col items-center max-h-[92vh]" onclick="event.stopPropagation()">
+      <button onclick="closeModal()" type="button" aria-label="Cerrar"
+              class="absolute -top-12 right-0 sm:-right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold transition shadow-lg">
+        &times;
+      </button>
+      <div class="bg-aws-navy border border-white/15 rounded-2xl overflow-hidden shadow-2xl flex flex-col w-full max-h-[88vh]">
+        <div class="bg-slate-950/90 flex items-center justify-center p-3 overflow-hidden flex-1 min-h-[300px]">
+          <img id="modal-img" src="" alt="Foto en tamaño completo"
+               class="max-h-[68vh] w-auto max-w-full object-contain rounded-xl shadow-lg" />
+        </div>
+        <div class="p-4 sm:p-5 bg-aws-navy border-t border-white/10">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 id="modal-title" class="font-bold text-lg sm:text-xl text-slate-100"></h3>
+              <p id="modal-subtitle" class="text-aws-orange text-sm font-semibold"></p>
+            </div>
+            <a id="modal-raw-link" href="#" target="_blank" rel="noopener noreferrer"
+               class="text-xs bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+              Abrir original ↗
+            </a>
+          </div>
+          <p id="modal-text" class="text-slate-300 text-sm mt-2 leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(imgSrc, nombre, comunidad, mensaje) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-img');
+      const modalTitle = document.getElementById('modal-title');
+      const modalSubtitle = document.getElementById('modal-subtitle');
+      const modalText = document.getElementById('modal-text');
+      const modalRawLink = document.getElementById('modal-raw-link');
+
+      modalImg.src = imgSrc;
+      modalTitle.textContent = nombre;
+      modalSubtitle.textContent = comunidad;
+      modalText.textContent = mensaje;
+      modalRawLink.href = imgSrc;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('image-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+      document.getElementById('modal-img').src = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
+
+  <footer class="border-t border-white/10 py-6 text-center text-sm text-slate-500">
+    Laboratorio desarrollado para la comunidad estudiantil · AWS Student Community Day Chile 2026
+  </footer>
+</body>
+</html>
